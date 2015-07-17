@@ -9,13 +9,13 @@ namespace D_Form
     public class Form
     {
         private String _Label;
-        private Dictionary<String, FormAnswer> _Answers;
+        private Dictionary<String, FormAnswer> _AnswerForms;
         private RootQuestion _RootQuestion;
 
         public Form()
         {
             _RootQuestion = new RootQuestion(this);
-            _Answers = new Dictionary<String, FormAnswer> (); 
+            _AnswerForms = new Dictionary<String, FormAnswer> (); 
         }
 
         public string Title 
@@ -28,17 +28,18 @@ namespace D_Form
         
        } set { _Label = value; } }
 
-        public int AnswerCount { get { return _Answers.Count(); } }
+        public int AnswerCount { get { return _AnswerForms.Count(); } }
 
         public RootQuestion Questions { get { return _RootQuestion; } }
 
-        public FormAnswer FindOrCreateAnswer(string name)
+        public FormAnswer FindOrCreateFormAnswer(string name)
         {
             FormAnswer a; 
-            _Answers.TryGetValue(name, out a);
+            _AnswerForms.TryGetValue(name, out a);
             if (a == null)
             {
-                a = new FormAnswer(_Answers, name);
+                a = new FormAnswer(name);
+                _AnswerForms.Add(name,a);
             }
             return a;
         }
@@ -49,14 +50,33 @@ namespace D_Form
     public class FormAnswer
     {
         private String _UniqueName;
+        private Dictionary<BaseQuestion, BaseAnswer> _Answers;
 
-        public FormAnswer(Dictionary<String, FormAnswer> d, string name)
+        public FormAnswer(string name)
         {
             _UniqueName = name;
-            d.Add(name,this);
+            _Answers = new Dictionary<BaseQuestion, BaseAnswer>();
         }
 
         public string UniqueName{ get { return _UniqueName; } }
+
+        public BaseAnswer FindAnswerFor(BaseQuestion bq)
+        {
+            BaseAnswer ba; 
+            _Answers.TryGetValue(bq, out ba);
+            return ba;
+        }
+        public BaseAnswer AddAnswerFor(BaseQuestion bq)
+        {
+             BaseAnswer ba; 
+            _Answers.TryGetValue(bq, out ba);
+            if (ba == null)
+            {
+                ba = (BaseAnswer)Activator.CreateInstance(bq.AnswerType);
+                _Answers.Add(bq, ba);
+            }
+            return ba;
+        }
 
 
     }
@@ -67,6 +87,7 @@ namespace D_Form
         List<BaseQuestion> _Childs = new List<BaseQuestion>();
         String _Title;
         int _Index;
+        bool _Required = true;
 
         public BaseQuestion()
         {
@@ -123,6 +144,7 @@ namespace D_Form
             else { _Parent.NotifiyChildsOfIndexMeddling(_Index, value); }
         } }
         public string Title { get { return _Title; } set { _Title = value; } }
+        public bool AllowEmptyAnswer { get { return _Required; } set { _Required = value; } }
         List<BaseQuestion> Childs { get { return _Childs; }}
         public BaseQuestion Parent { get { return _Parent; } set 
         {
@@ -148,6 +170,7 @@ namespace D_Form
                 _Parent.Childs.Add(this);
             }
         } }
+        abstract public Type AnswerType { get; set; }
 
         public bool Contains(BaseQuestion q)
         {
@@ -186,11 +209,37 @@ namespace D_Form
             _Parent = form;
         }
 
+       override public Type AnswerType { get; set; }
 
     }
 
     public class PaneQuestion : BaseQuestion
     {
+        override public Type AnswerType { get; set; }
+    }
+
+    public class OpenQuestion : BaseQuestion
+    {
+        Type _AnswerType;
+       override public Type AnswerType { get{
+           if (_AnswerType == null)
+           {
+               return typeof(OpenAnswer);
+           }
+           else return _AnswerType;
+           
+       } set{_AnswerType = value;} }
+    }
+
+
+    public abstract class BaseAnswer
+    {
 
     }
+
+    public class OpenAnswer : BaseAnswer
+    {
+        public string FreeAnswer;
+    }
+
 }

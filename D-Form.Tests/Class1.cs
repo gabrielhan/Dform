@@ -19,13 +19,13 @@ namespace D_Form.Tests
             f.Title = "jj";
             Assert.AreEqual("jj", f.Title);
 
-            FormAnswer a = f.FindOrCreateAnswer("Emilie");
+            FormAnswer a = f.FindOrCreateFormAnswer("Emilie");
             Assert.IsNotNull(a);
-            FormAnswer b = f.FindOrCreateAnswer("Emilie");
+            FormAnswer b = f.FindOrCreateFormAnswer("Emilie");
             Assert.AreSame(a,b);
 
             Assert.AreEqual(1, f.AnswerCount);
-            FormAnswer c = f.FindOrCreateAnswer("John Doe");
+            FormAnswer c = f.FindOrCreateFormAnswer("John Doe");
             Assert.AreNotSame(a, c);
 
             Assert.AreEqual("Emilie", a.UniqueName);
@@ -50,6 +50,28 @@ namespace D_Form.Tests
             q2.Parent = q1;
             Assert.IsTrue(f.Questions.Contains(q1));
             Assert.IsTrue(f.Questions.Contains(q2));
+        }
+
+         [Test]
+        public void latotale()
+        {
+             Form f = new Form();
+
+             OpenQuestion qOpen = (OpenQuestion)f.Questions.AddNewQuestion(typeof(OpenQuestion));
+             qOpen.Title = "first wtf question";
+             qOpen.AllowEmptyAnswer = false;
+
+             FormAnswer a = f.FindOrCreateFormAnswer("Emilie");
+             BaseAnswer theAnswerOfEmilie_1 = a.FindAnswerFor(qOpen);
+             if(theAnswerOfEmilie_1 == null)
+             {
+                 theAnswerOfEmilie_1 = a.AddAnswerFor(qOpen);
+             }
+             Assert.IsInstanceOfType(typeof(OpenAnswer), theAnswerOfEmilie_1);
+
+             OpenAnswer emilieAnswer = (OpenAnswer)theAnswerOfEmilie_1;
+             emilieAnswer.FreeAnswer = "yolo";
+             Assert.AreEqual(emilieAnswer, theAnswerOfEmilie_1);
         }
     }
 }
