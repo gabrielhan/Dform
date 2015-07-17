@@ -42,6 +42,10 @@ namespace D_Form.Tests
             BaseQuestion q2 = f.Questions.AddNewQuestion("D_Form.PaneQuestion");
             Assert.AreEqual(0, q1.Index);
             Assert.AreEqual(1, q2.Index);
+            q1.Title = "toto";
+            q2.Title = "q2 is here";
+            Assert.AreEqual("toto", q1.Title);
+            f.Questions.ShowMe(0);
             q2.Index = 0;
             Assert.AreEqual(0, q2.Index);
             Assert.AreEqual(1, q1.Index);
@@ -50,6 +54,7 @@ namespace D_Form.Tests
             q2.Parent = q1;
             Assert.IsTrue(f.Questions.Contains(q1));
             Assert.IsTrue(f.Questions.Contains(q2));
+            f.Questions.ShowMe(0);
         }
 
          [Test]

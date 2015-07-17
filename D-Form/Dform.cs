@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace D_Form
 {
+    [Serializable]
     public class Form
     {
         private String _Label;
@@ -43,6 +45,7 @@ namespace D_Form
             }
             return a;
         }
+
 
 
     }
@@ -198,6 +201,25 @@ namespace D_Form
             return a;
         }
 
+        public void ShowMe(int depth)
+        {
+            for (int i = depth; i > 0; i--) 
+            {
+                Console.Write("-");
+                
+            }
+
+            Console.WriteLine(Title);
+            if(_Childs != null)
+            {
+                depth++;
+                foreach(BaseQuestion bq in _Childs)
+                {
+                    bq.ShowMe(depth);
+                }
+            }
+        }
+
     }
 
     public class RootQuestion : BaseQuestion
@@ -234,12 +256,20 @@ namespace D_Form
 
     public abstract class BaseAnswer
     {
-
+        abstract public void ShowAnswer();
     }
 
     public class OpenAnswer : BaseAnswer
     {
         public string FreeAnswer;
+
+        override public void ShowAnswer()
+        {
+
+            Debug.WriteLine("Freetext!");
+            if(FreeAnswer != null)
+                Debug.WriteLine(FreeAnswer);
+        }
     }
 
 }
