@@ -64,17 +64,71 @@ namespace D_Form
     public abstract class BaseQuestion
     {
         BaseQuestion _Parent;
-        List<BaseQuestion> _Childs;
+        List<BaseQuestion> _Childs = new List<BaseQuestion>();
         String _Title;
         int _Index;
 
-        public int Index { get { return _Index; } set { _Index = value; } }
+        public BaseQuestion()
+        {
+            List<BaseQuestion> _Childs = new List<BaseQuestion>();
+        }
+
+        protected void NotifiyChildsOfIndexMeddling(int oldindex, int newindex)
+        {
+            if (oldindex != newindex)
+            {
+                if (newindex >= 0)
+                {
+                    foreach (BaseQuestion qq in _Childs)
+                    {
+                        qq.IndexModif(oldindex, newindex);
+                    }
+                }
+                else
+                {
+                    foreach (BaseQuestion qq in _Childs)
+                    {
+                        qq.IndexSuppr(oldindex);
+                    }
+                }
+
+            }
+
+        }
+        protected void IndexModif(int oldindex, int newindex)
+        {
+            if (_Index == oldindex)
+            {
+                _Index = newindex;
+            }else if(_Index <= oldindex & _Index >= newindex)
+            {
+                _Index++;
+            }
+            else if (_Index >= oldindex & _Index <= newindex)
+            {
+                _Index--;
+            }
+        }
+        protected void IndexSuppr(int deletedIndex)
+        {
+            if(_Index > deletedIndex)
+            {
+                _Index--;
+            }
+        }
+
+        public int Index { get { return _Index; } set 
+        {
+            if (value <= 0) { _Parent.NotifiyChildsOfIndexMeddling(_Index,0);}
+            else { _Parent.NotifiyChildsOfIndexMeddling(_Index, value); }
+        } }
         public string Title { get { return _Title; } set { _Title = value; } }
-        protected List<BaseQuestion> Childs { get { return _Childs; }}
+        List<BaseQuestion> Childs { get { return _Childs; }}
         public BaseQuestion Parent { get { return _Parent; } set 
         {
             if((value != _Parent) & (_Parent != null))
             {
+                _Parent.NotifiyChildsOfIndexMeddling(_Index, -1);
                 _Parent.Childs.Remove(this);
             }
             if(value == null)
@@ -83,16 +137,37 @@ namespace D_Form
             }else if(value != _Parent)
             {
                 _Parent = value;
-                _Index = _Parent._Childs.Count();
+                if(_Parent.Childs == null )
+                {
+                    _Index = 0;
+                }
+                else
+                {
+                    _Index = _Parent.Childs.Count();
+                }
                 _Parent.Childs.Add(this);
             }
         } }
 
         public bool Contains(BaseQuestion q)
         {
-            return true;
+            return q.HaveAncestor(this);
+        }
+        public bool HaveAncestor(BaseQuestion q)
+        {
+            if (this.Parent == q)
+                return true;
+            if (this.Parent is RootQuestion)
+                return false;
+            return this.Parent.HaveAncestor(q);
         }
 
+        public BaseQuestion AddNewQuestion(Type type)
+        {
+            BaseQuestion a = (BaseQuestion)Activator.CreateInstance(type);
+            a.Parent = this;
+            return a;
+        }
         public BaseQuestion AddNewQuestion(String s)
         {
             BaseQuestion a = (BaseQuestion)Activator.CreateInstance(Type.GetType(s));
@@ -105,8 +180,6 @@ namespace D_Form
     public class RootQuestion : BaseQuestion
     {
         private Form _Parent;
-        private String _Title;
-        private List<BaseQuestion> _Childs;
 
         public RootQuestion(Form form)
         {
@@ -114,18 +187,10 @@ namespace D_Form
         }
 
 
-        public BaseQuestion AddNewQuestion(Type type)
-        {
-            return (BaseQuestion)Activator.CreateInstance(type);
-        }
-
-
     }
 
     public class PaneQuestion : BaseQuestion
     {
-        private Form _Parent;
-        private String _Title;
-        private List<BaseQuestion> _Childs;
+
     }
 }

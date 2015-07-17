@@ -39,7 +39,7 @@ namespace D_Form.Tests
             f.Questions.Title = "HG68-Bis";
             Assert.AreEqual("HG68-Bis", f.Title);
             BaseQuestion q1 = f.Questions.AddNewQuestion(typeof(PaneQuestion));
-            BaseQuestion q2 = f.Questions.AddNewQuestion("D_Form.PaneQuestion,D_Form");
+            BaseQuestion q2 = f.Questions.AddNewQuestion("D_Form.PaneQuestion");
             Assert.AreEqual(0, q1.Index);
             Assert.AreEqual(1, q2.Index);
             q2.Index = 0;
