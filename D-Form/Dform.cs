@@ -70,11 +70,19 @@ namespace D_Form
 
         public int Index { get { return _Index; } set { _Index = value; } }
         public string Title { get { return _Title; } set { _Title = value; } }
+        protected List<BaseQuestion> Childs { get { return _Childs; }}
         public BaseQuestion Parent { get { return _Parent; } set 
         {
-            _Parent = value;
-            if (_Parent != null)
+            if((value != _Parent) & (_Parent != null))
             {
+                _Parent.Childs.Remove(this);
+            }
+            if(value == null)
+            {
+                _Parent = null;
+            }else if(value != _Parent)
+            {
+                _Parent = value;
                 _Index = _Parent._Childs.Count();
                 _Parent.Childs.Add(this);
             }
